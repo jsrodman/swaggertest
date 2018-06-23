@@ -21,7 +21,7 @@ produces:
 paths:
   /keys:
     get:
-      description: Fetches list of API keys
+      description: Fetches a list of all API keys for the customer environment, including agent keys and api keys for programmatic API acccess
       summary: List of API keys
       operationId: ListKeys
       tags:
@@ -31,7 +31,7 @@ paths:
         - application/json
       responses:
         200:
-          description: List of API Keys
+          description: List of API Keys.  The scopes list integers indicate the type of key, where 1 is a ServerAgent key, 2 is a JS Agent key, 101 is a Read-Only API key, and 102 is a Full Access API key.
           schema:
             $ref: '#/definitions/ApiKeyList'
           examples:
@@ -51,7 +51,7 @@ paths:
       security:
         - Bearer: []
     post:
-      description: Create an API key
+      description: Create an API or agent key
       summary: Create API key
       operationId: CreateKey
       tags:
@@ -83,7 +83,7 @@ paths:
         - Bearer: []
   /keys/{token}:
     delete:
-      description: Remove API Key
+      description: Delete an API or agent key
       summary: Remove API Key
       operationId: RemoveKey
       tags:
@@ -99,7 +99,7 @@ paths:
           in: path
           required: true
           type: string
-          description: The API Token that you want to delete
+          description: The API Token that you want to delete ( the token field in the key list )
       responses:
         200:
           description: API Key was successfully removed
@@ -107,8 +107,8 @@ paths:
         - Bearer: []
   /apps/{app_id}:
     get:
-      description: Fetches details for the app with the given ID.
-      summary: Get app details
+      description: Fetches the display-name and App ID for the app with the given ID.
+      summary: Get app name and ID
       operationId: GetAppDetails
       tags:
         - apps
@@ -122,7 +122,7 @@ paths:
           description: The app ID
       responses:
         200:
-          description: Details for the provided app
+          description: A JSON object with the app ID and the user-friendly app display name
           schema:
             $ref: '#/definitions/AppDetails'
           examples:
@@ -135,7 +135,7 @@ paths:
         - Bearer: []
   /apps:
     get:
-      description: Fetches details for all apps (matching the provided criteria).
+      description: Fetches app name and app ID for all apps in a customer environment.
       summary: List apps
       operationId: ListApps
       tags:
@@ -176,7 +176,7 @@ paths:
         - application/json
       responses:
         200:
-          description: New application Id
+          description: The application ID for the newly created tCell app
           schema:
             $ref: '#/definitions/NewApp'
           examples:
@@ -186,8 +186,8 @@ paths:
         - Bearer: []
   /apps/{app_id}/tags:
     get:
-        description: Fetch tags for an application
-        summary: Tags for app
+        description: Fetch the set of tags for a tCell app
+        summary: Get the Tags for an app
         operationId: ListTagsForApp
         parameters:
           - name: app_id
@@ -201,7 +201,7 @@ paths:
           - application/json
         responses:
           200:
-            description: Tags for an app
+            description: An array of tags for the chosen app
             schema:
               $ref: '#/definitions/TagsListResponse'
             examples:
@@ -210,7 +210,7 @@ paths:
         security:
           - Bearer: []
     post:
-      description: Add tags to application
+      description: All the tags posted in the body will be added to the set of tags the app already has
       summary: Add tags
       operationId: AddTags
       tags:
@@ -236,7 +236,7 @@ paths:
       security:
         - Bearer: []
     put:
-      description: Update application tags
+      description: Assign a complete new set of tags to an app, removing any previously existing tags.
       summary: Update tags
       operationId: UpdateTags
       tags:
@@ -264,7 +264,7 @@ paths:
       security:
         - Bearer: []
     delete:
-      description: Remove tags from the application
+      description: Remove all tags from the application
       summary: Remove tags
       operationId: RemoveTags
       tags:
@@ -279,11 +279,6 @@ paths:
           required: true
           type: string
           description: The app ID
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ModifyTagsInAppBody'
       produces:
         - application/json
       responses:
@@ -313,14 +308,14 @@ paths:
           description: The app ID
       responses:
         200:
-          description: Details for the provided agent
+          description: Details for the provided agent, including the agent type (ApacheAgent, JVMAgent, etc), version string, earliest and most recent time seen, and whether the agent is currently known to be actively sending data to the tCell service.
           schema:
             $ref: '#/definitions/AgentDetails'
           examples:
             1:
-              id: p-lightreg0
+              id: webserver1
               type: JVMAgent
-              version: 0.2.2
+              version: 1.2.2
               from: 1497046105489
               to: 1501553245386
               active: false
@@ -347,17 +342,17 @@ paths:
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+          description: The beginning (earliest endpoint) of a time window for known agents.  Agents which connected to the tCell service outside this window will not be returned.  Value in milliseconds from UNIX epoch.  Data is not available for over 30 days into the past.
         - name: to
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+          description: The end (most recent endpoint)  of a time window for known agents.  Agents which connected to the tCell service outside this window will not be returned.  Value in milliseconds from UNIX epoch.
         - name: per_page
           in: query
           required: false
           type: integer
-          description: Specify number of returned results per page.
+          description: Specify number of returned results per page, defaults to 10.
         - name: page
           in: query
           required: false
@@ -408,7 +403,7 @@ paths:
           description: The app ID
       responses:
         200:
-          description: Details for the provided route
+          description: Details for the provided route, including the route id, http method, route pattern used by the framework, and a code signature for the controller.
           schema:
             $ref: '#/definitions/RouteDetails'
           examples:
@@ -440,17 +435,17 @@ paths:
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+          description: The beginning (earliest endpoint) of a time window for known routes.  Routes reported by agents outside this window will not be returned.  Value in milliseconds from UNIX epoch.  Data is not available for over 30 days into the past.
         - name: to
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+          description: The end (most recent endpoint)  of a time window for known routes.  Routes reported by agents outside this window will not be returned.  Value in milliseconds from UNIX epoch.
         - name: per_page
           in: query
           required: false
           type: integer
-          description: The number of results to be returned per page
+          description: The number of results to be returned per page, defaults to 10.
         - name: page
           in: query
           required: false
@@ -458,7 +453,7 @@ paths:
           description: Select which page is returned, default/first page is 1.
       responses:
         200:
-          description: A list of all routes matching the provided criteria
+          description: A list of details for all routes matching the provided criteria including the route id, http method, route pattern used by the framework, and a code signature for the controller.
           schema:
             $ref: '#/definitions/RouteList'
           examples:
@@ -497,7 +492,7 @@ paths:
           description: The app ID
       responses:
         200:
-          description: Details for the given inline script
+          description: Details for the given inline script, including approved: whether the script is marked as intended;  template: the script text with literals replaced by ?; created_at: when the script was added to the tCell database; last_reported_at: when the jsagent last reported this script.
           schema:
             $ref: '#/definitions/InlineScriptDetails'
           examples:
@@ -530,17 +525,17 @@ paths:
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+          description: The beginning (earliest endpoint) of a time window for inline scripts.  Inline scripts reported by agents outside this window will not be returned.  Value in milliseconds from UNIX epoch.  Data is not available for over 30 days into the past.
         - name: to
           in: query
           required: false
           type: integer
-          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+          description: The end (most recent endpoint) of a time window for inline scripts.  Inline scripts reported by agents outside this window will not be returned.  Value in milliseconds from UNIX epoch.
         - name: per_page
           in: query
           required: false
           type: integer
-          description: Specify number of returned results per page.
+          description: Specify number of returned results per page, defaults to 10.
         - name: page
           in: query
           required: false
@@ -958,11 +953,8 @@ definitions:
         description: Name of the API key
         type: string
       scope:
-        description: The scope of the API key (1 is for Server Agent, 2 is for JS Agent)
-        type: integer
-        enum:
-          - 1
-          - 2
+        description: The scope of the API key which may be one of "Server Agent", "Web Server Agent", "JSAgent", "User Read-Only"
+        type: string
     required:
       - name
       - scope
@@ -1022,7 +1014,7 @@ definitions:
     type: object
     properties:
       tags:
-        description: List of tags(String) for the application
+        description: List of strings, presenting the tags for the application
         type: array
         items:
           type: string
@@ -1031,7 +1023,7 @@ definitions:
     type: object
     properties:
       tags:
-        description: List of tags(String) for the application
+        description: List of strings, choosing the new tags for the application
         type: array
         items:
           type: string
