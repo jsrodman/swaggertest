@@ -1,0 +1,1259 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: tCell
+  description: Public tCell API
+host: api.tcell.io
+basePath: /customer/api/v1
+x-proxy-enabled: false
+x-explorer-enabled: true
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /keys:
+    get:
+      description: Fetches list of API keys
+      summary: List of API keys
+      operationId: ListKeys
+      tags:
+        - keys
+        - api keys
+      produces:
+        - application/json
+      responses:
+        200:
+          description: List of API Keys
+          schema:
+            $ref: '#/definitions/ApiKeyList'
+          examples:
+            1:
+              total: 2
+              keys:
+                - name: My ServerAgent Key
+                  token: AQBABAFA1RksYIRKMLRb0MnizHYxhkljcu7HRw-DsTz1piLEwbZS1HuFYmApR0HIkoOBfD1
+                  scopes: [1]
+                  createdAt: 1507215994161
+                  lastUsedAt: 1507215994161
+                - name: My JS Agent Key
+                  token: AQHRBAFw5bpAq4hFfJWYv2U8tWSehkljUu7KRw-DqGz4oiLAwQIE7BgCttph9ytqDRQ49ea
+                  scopes: [2]
+                  createdAt: 1510572886742
+                  lastUsedAt: 1510739815690
+      security:
+        - Bearer: []
+    post:
+      description: Create an API key
+      summary: Create API key
+      operationId: CreateKey
+      tags:
+        - keys
+        - create
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateNewKeyBody'
+      responses:
+        200:
+          description: New API key
+          schema:
+            $ref: '#/definitions/ApiKey'
+          examples:
+            1:
+              name: My ServerAgent Key
+              token: AQBABAFA1RksYIRKMLRb0MnizHYxhkljcu7HRw-DsTz1piLEwbZS1HuFYmApR0HIkoOBfD1
+              scopes: [1]
+              createdAt: 1507215994161
+              lastUsedAt: 1507215994161
+      security:
+        - Bearer: []
+  /keys/{token}:
+    delete:
+      description: Remove API Key
+      summary: Remove API Key
+      operationId: RemoveKey
+      tags:
+        - keys
+        - delete
+        - remove
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: path
+          required: true
+          type: string
+          description: The API Token that you want to delete
+      responses:
+        200:
+          description: API Key was successfully removed
+      security:
+        - Bearer: []
+  /apps/{app_id}:
+    get:
+      description: Fetches details for the app with the given ID.
+      summary: Get app details
+      operationId: GetAppDetails
+      tags:
+        - apps
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: Details for the provided app
+          schema:
+            $ref: '#/definitions/AppDetails'
+          examples:
+            1:
+              id: MyApp-QX7E7
+              name: My App
+        404:
+          description: No app with the provided ID was found
+      security:
+        - Bearer: []
+  /apps:
+    get:
+      description: Fetches details for all apps (matching the provided criteria).
+      summary: List apps
+      operationId: ListApps
+      tags:
+        - apps
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Details for all apps
+          schema:
+            $ref: '#/definitions/AppList'
+          examples:
+            1:
+              total: 2
+              apps:
+                - id: MyApp-QX7E7
+                  name: My App
+                - id: MyOtherApp-j9Gye
+                  name: My Other App
+      security:
+        - Bearer: []
+    post:
+      description: Create an application
+      summary: Create app
+      operationId: CreateApp
+      tags:
+        - apps
+        - create
+      consumes:
+        - applications/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateNewAppBody'
+      produces:
+        - application/json
+      responses:
+        200:
+          description: New application Id
+          schema:
+            $ref: '#/definitions/NewApp'
+          examples:
+            1:
+              app_id: MyApp-QX7E7
+      security:
+        - Bearer: []
+  /apps/{app_id}/tags:
+    get:
+        description: Fetch tags for an application
+        summary: Tags for app
+        operationId: ListTagsForApp
+        parameters:
+          - name: app_id
+            in: path
+            required: true
+            type: string
+            description: The app ID
+        tags:
+          - apps
+        produces:
+          - application/json
+        responses:
+          200:
+            description: Tags for an app
+            schema:
+              $ref: '#/definitions/TagsListResponse'
+            examples:
+              1:
+                tags: [production, web-api]
+        security:
+          - Bearer: []
+    post:
+      description: Add tags to application
+      summary: Add tags
+      operationId: AddTags
+      tags:
+        - app
+        - tags
+        - add
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ModifyTagsInAppBody'
+      responses:
+        200:
+          description: Successfully added tags
+      security:
+        - Bearer: []
+    put:
+      description: Update application tags
+      summary: Update tags
+      operationId: UpdateTags
+      tags:
+        - app
+        - tags
+        - update
+      consumes:
+        - applications/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ModifyTagsInAppBody'
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Successfully updated tags
+      security:
+        - Bearer: []
+    delete:
+      description: Remove tags from the application
+      summary: Remove tags
+      operationId: RemoveTags
+      tags:
+        - app
+        - tags
+        - remove
+      consumes:
+        - applications/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ModifyTagsInAppBody'
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Successfully removed tags
+      security:
+        - Bearer: []
+  /apps/{app_id}/agents/{agent_id}:
+    get:
+      description: Fetches details for the agent with the given ID.
+      summary: Get agent details
+      operationId: GetAgentDetails
+      tags:
+        - agents
+      produces:
+        - application/json
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          type: string
+          description: The agent ID
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: Details for the provided agent
+          schema:
+            $ref: '#/definitions/AgentDetails'
+          examples:
+            1:
+              id: p-lightreg0
+              type: JVMAgent
+              version: 0.2.2
+              from: 1497046105489
+              to: 1501553245386
+              active: false
+        404:
+          description: No agent with the provided ID was found
+      security:
+        - Bearer: []
+  /apps/{app_id}/agents:
+    get:
+      description: Fetches details for all seen agents (optionally matching the provided criteria).
+      summary: List agents
+      operationId: ListAgents
+      tags:
+        - agents
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: from
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+        - name: to
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+        - name: per_page
+          in: query
+          required: false
+          type: integer
+          description: Specify number of returned results per page.
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: Select which page is returned, default/first page is 1.
+      responses:
+        200:
+          description: A list of all agents matching the provided criteria
+          schema:
+            $ref: '#/definitions/AgentList'
+          examples:
+            1:
+              total: 2
+              agents:
+                - id: my-agent0
+                  type: JVMAgent
+                  version: 0.2.2
+                  from: 1497046105489
+                  to: 1501553245386
+                  active: false
+                - id: my-agent1
+                  type: JVMAgent
+                  version: 0.2.3
+                  from: 1497046105496
+                  to: 1497369265492
+                  active: true
+      security:
+        - Bearer: []
+  /apps/{app_id}/routes/{route_id}:
+    get:
+      description: Fetches details for the route with the given ID.
+      summary: Get route details
+      operationId: GetRouteDetails
+      tags:
+        - routes
+      produces:
+        - application/json
+      parameters:
+        - name: route_id
+          in: path
+          required: true
+          type: string
+          description: The route ID
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: Details for the provided route
+          schema:
+            $ref: '#/definitions/RouteDetails'
+          examples:
+            1:
+              id: 1029059990
+              method: get
+              pattern: /path/to/my/route
+              controller: my.controller
+        404:
+          description: No route with the provided ID was found
+      security:
+        - Bearer: []
+  /apps/{app_id}/routes:
+    get:
+      description: Fetches details for all seen routes (matching the provided criteria).
+      summary: List routes
+      operationId: ListRoutes
+      tags:
+        - routes
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: from
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+        - name: to
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+        - name: per_page
+          in: query
+          required: false
+          type: integer
+          description: The number of results to be returned per page
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: Select which page is returned, default/first page is 1.
+      responses:
+        200:
+          description: A list of all routes matching the provided criteria
+          schema:
+            $ref: '#/definitions/RouteList'
+          examples:
+            1:
+              total: 2
+              routes:
+                - id: 1029059990
+                  method: get
+                  pattern: /path/to/my/route
+                  controller: my.controller
+                - id: 1956030401
+                  method: post
+                  pattern: /path/to/my/other/route
+                  controller: my.other.controller
+      security:
+        - Bearer: []
+  /apps/{app_id}/inline_scripts/{inline_script_id}:
+    get:
+      description: Fetches details for the inline script with the given ID.
+      summary: Get inline script details
+      operationId: GetInlineScriptDetails
+      tags:
+        - inline scripts
+      produces:
+        - application/json
+      parameters:
+        - name: inline_script_id
+          in: path
+          required: true
+          type: string
+          description: The inline script ID
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: Details for the given inline script
+          schema:
+            $ref: '#/definitions/InlineScriptDetails'
+          examples:
+            1:
+              id: sha256-A08OmFGXGZjnMgeFRMlrNsPQHO33yqMyNZ1vHYNWcBQ=
+              approved: false
+              template: 'alert(?)'
+              created_at: 1497046027847
+              last_reported_at": 1502944538974
+        404:
+          description: No inline script with the provided ID was found
+      security:
+        - Bearer: []
+  /apps/{app_id}/inline_scripts:
+    get:
+      description: Fetches details for all seen inline scripts (matching the provided criteria).
+      summary: List inline scripts
+      operationId: ListInlineScripts
+      tags:
+        - inline scripts
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: from
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+        - name: to
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+        - name: per_page
+          in: query
+          required: false
+          type: integer
+          description: Specify number of returned results per page.
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: Select which page is returned, default/first page is 1.
+      responses:
+        200:
+          description: A list of all inline scripts matching the provided criteria
+          schema:
+            $ref: '#/definitions/InlineScriptList'
+          examples:
+            1:
+              total: 2
+              inline_scripts:
+                - id: sha256-A08OmFGXGZjnMgeFRMlrNsPQHO33yqMyNZ1vHYNWcBQ=
+                  approved: false
+                  created_at: 1497046027847
+                  last_reported_at: 1502944422734
+                - id: sha256-rO8xIoxDJxqDH_X33TtZFlHjp5y6BgfT5QBUMSuvQfg=
+                  approved: false
+                  created_at: 1497048192298
+                  last_reported_at: 1502944404240
+      security:
+        - Bearer: []
+  /apps/{app_id}/packages/{package_id}:
+    get:
+      description: Fetches details for the package with the given ID.
+      summary: Get package details
+      operationId: GetPackageDetails
+      tags:
+        - packages
+      produces:
+        - application/json
+      parameters:
+        - name: package_id
+          in: path
+          required: true
+          type: string
+          description: The package ID
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: Details for the provided package
+          schema:
+            $ref: '#/definitions/PackageDetails'
+          examples:
+            1:
+              id: 2579938
+              vendor: org.apache.tomcat
+              name: tomcat-catalina-ha
+              version: 7.0.69
+              build: unknown
+              created_at: 1497046105495
+        404:
+          description: No package with the provided ID was found
+      security:
+        - Bearer: []
+  /apps/{app_id}/packages:
+    get:
+      description: Fetches details for all seen packages (matching the provided criteria).
+      summary: List packages
+      operationId: ListPackages
+      tags:
+        - packages
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: from
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; exclusive) from which to fetch events.
+        - name: to
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; inclusive) until which to fetch events.
+        - name: per_page
+          in: query
+          required: false
+          type: integer
+          description: The number of results to be returned per page
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: Select which page is returned, default/first page is 1.
+      responses:
+        200:
+          description: A list of all packages matching the provided criteria
+          schema:
+            $ref: '#/definitions/PackageList'
+          examples:
+            1:
+              total: 2
+              packages:
+                - id: 2579938
+                  vendor: org.apache.tomcat
+                  name: tomcat-catalina-ha
+                  version: 7.0.69
+                  build: unknown
+                  created_at: 1497046105495
+                - id: 2579939
+                  vendor: org.apache.tomcat
+                  name: tomcat-juli
+                  version: 7.0.69
+                  build: unknown
+                  created_at: 1497046105495
+      security:
+        - Bearer: []
+  /apps/{app_id}/sources/{source}/table:
+    get:
+      description: Fetches events of the provided type.
+      summary: Get events
+      operationId: GetEvents
+      tags:
+        - events
+      produces:
+        - application/json
+      parameters:
+        - name: source
+          in: path
+          required: true
+          type: string
+          description: The type of events to fetch
+          enum: [ appfirewall, inline, login, csp ]
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: timerange
+          in: query
+          required: false
+          type: string
+          description: Relative time from now (ignored if `from` is provided).
+          enum: [ 1h, 3h, 6h, 12h, 24h, 72h, 1w, 2w, 1mo ]
+        - name: filter
+          in: query
+          required: false
+          type: string
+          description: |
+            Filters out events based on a predicate.
+            The syntax is `filter=field:operator:value`, where:
+            `field` is a field present in the data
+            `operator` is one of `include` (equals), `exclude` (not equals), `gt` (greater than), and `lt` (less than)
+            `value` is the value to apply the operator to
+
+            Examples:
+            Only return events where `id` is `"foo"`:
+            `filter=id:include:foo`
+            Don't include events where `id` is `"bar"`:
+            `filter=id:exclude:bar`
+        - name: group_by
+          in: query
+          required: false
+          type: string
+          description: |
+            Field to group events by.
+
+            Examples:
+            Group by `city`:
+            `group_by=city`
+
+            Group by `city` and `user_id`:
+            `group_by=city&group_by=user_id`
+        - name: sort_by
+          in: query
+          required: false
+          type: string
+          description: Field to sort events by
+        - name: order
+          in: query
+          required: false
+          type: string
+          description: Order to sort events in
+          enum: [ asc, desc ]
+        - name: column
+          in: query
+          required: false
+          type: string
+          description: |
+            Selects which fields to include in the results.
+
+            Examples:
+            Only include the `id` field:
+            `column=id`
+
+            Only include the `id`, `city`, and `ip` fields:
+            `column=id&column=city&column=ip`
+      responses:
+        200:
+          description: A list of matching events.
+          examples:
+            1:
+              total: 1
+              table:
+                - method: Post
+                  city: Bogotá
+                  full_uri: null
+                  ip: 192.123.123.123
+                  parameter: null
+                  location:
+                    location:
+                      latitude: 4.6492
+                      longitude: -74.0628
+                      city: Bogotá
+                      country: Colombia
+                      iso-code: CO
+                    is-tor: false
+                    asn:
+                      number: AS3816
+                      name: TELECOMUNICACIONES S.A. ESP
+                  session_id: f6e075f9f334a28ab5da8a58bec253450fec0cd212bb7863fd1f72b4f0c6ace8
+                  path: /some/path/*
+                  detection_point: s5xx
+                  payload: null
+                  country: Colombia
+                  stripped_uri: https://my-side.corp/some/path/*
+                  user_id: null
+                  to: null
+                  pattern_id: null
+                  route_id: 157347626
+                  transaction_id: null
+                  id: 40577ef1-8314-11e7-9d63-8fc126905e2f
+                  from: null
+                  app_id: DemoB-QX7E7
+                  route: post /some/path/*
+                  time: 1502950866015
+      security:
+        - Bearer: []
+  /apps/{app_id}/configs/latest:
+    get:
+      description: Fetches the currently active app config.
+      summary: Get the active config
+      operationId: GetLatestConfig
+      tags:
+        - configs
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: The latest config data
+      security:
+        - Bearer: []
+  /apps/{app_id}/configs/{config_id}:
+    get:
+      description: Fetches the config with the given ID.
+      summary: Get config
+      operationId: GetConfig
+      tags:
+        - configs
+      produces:
+        - application/json
+      parameters:
+        - name: config_id
+          in: path
+          required: true
+          type: integer
+          description: The config ID
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: The config data for the given config ID
+          examples: {}
+        404:
+          description: No config with the provided ID was found
+      security:
+        - Bearer: []
+  /apps/{app_id}/configs/blockedips/blacklistedips:
+    post:
+      description: Add ips to the existing blacklisted ips list inside the blocked ips config
+      summary: Add ips to blacklisted list
+      operationId: PostBlacklistedIp
+      tags:
+        - configs
+        - blacklist
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: The new config id
+        422:
+          description: Validation failure
+          examples: {
+                        "message": "Config validation failed. 1 invalid IP(s) in blockedips: myIp%*#",
+                        "errors": [
+                            {
+                                "code": "invalid",
+                                "field": "ip"
+                            }
+                        ]
+                    }
+      security:
+        - Bearer: []
+    delete:
+      description: Remove ips from the existing blacklisted ips list inside the blocked ips config
+      summary: Remove ips from blacklisted list
+      operationId: DeleteBlacklistedIp
+      tags:
+        - configs
+        - blacklist
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+      responses:
+        200:
+          description: The new config id
+          examples: {}
+      security:
+        - Bearer: []
+  /apps/{app_id}/configs:
+    get:
+      description: Fetches details for all configs (matching the provided criteria).
+      summary: List configs
+      operationId: ListConfigs
+      tags:
+        - configs
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: from
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; exclusive) from which to fetch events
+        - name: to
+          in: query
+          required: false
+          type: integer
+          description: Unix timestamp (in ms; inclusive) until which to fetch events
+        - name: per_page
+          in: query
+          required: false
+          type: integer
+          description: The number of results to be returned per page
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: Select which page is returned (defaults to 1)
+      responses:
+        200:
+          description: A list of configs matching the provided criteria
+          schema:
+            $ref: '#/definitions/ConfigList'
+          examples: {}
+      security:
+        - Bearer: []
+    post:
+      description: Rewrites the app config, either in part or in full.
+      summary: Post config changes
+      operationId: PostConfig
+      tags:
+        - configs
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+          description: The app ID
+        - name: body
+          in: body
+          required: true
+          schema: {}
+          description: A config data object
+      responses:
+        200:
+          description: ''
+      security:
+        - Bearer: []
+definitions:
+  CreateNewKeyBody:
+    title: Create new key body
+    type: object
+    properties:
+      name:
+        description: Name of the API key
+        type: string
+      scope:
+        description: The scope of the API key (1 is for Server Agent, 2 is for JS Agent)
+        type: integer
+        enum:
+          - 1
+          - 2
+    required:
+      - name
+      - scope
+  ApiKey:
+    title: Create new key body
+    type: object
+    properties:
+      name:
+        description: Name of the API key
+        type: string
+      token:
+        description: The API Key token
+        type: string
+      scope:
+        description: The scope of the API key (1 is for Server Agent, 2 is for JS Agent)
+        type: integer
+        enum:
+          - 1
+          - 2
+      createdAt:
+        description: UNIX timestamp (in ms) when the key was created
+        type: integer
+      lastUsedAt:
+        description: UNIX timestamp (in ms) when the key was last used
+        type: integer
+    required:
+      - name
+      - token
+      - scope
+      - createdAt
+  ApiKeyList:
+    title: API key list
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      keys:
+        description: A list of API keys
+        type: array
+        items:
+          $ref: '#/definitions/ApiKey'
+    required:
+      - total
+      - keys
+  CreateNewAppBody:
+    title: Create new application body
+    type: object
+    properties:
+      app_display_name:
+        description: The display name of your new application (An app id will be derived from this name)
+        type: string
+    required:
+      - app_display_name
+  TagsListResponse:
+    title: Tags response
+    type: object
+    properties:
+      tags:
+        description: List of tags(String) for the application
+        type: array
+        items:
+          type: string
+  ModifyTagsInAppBody:
+    title: Modify tags for application
+    type: object
+    properties:
+      tags:
+        description: List of tags(String) for the application
+        type: array
+        items:
+          type: string
+    required:
+      - tags
+  AppDetails:
+    title: App Details
+    type: object
+    properties:
+      id:
+        description: The app ID
+        type: string
+      name:
+        description: The name of the app
+        type: string
+    required:
+      - id
+      - name
+  RouteDetails:
+    title: Route Details
+    type: object
+    properties:
+      id:
+        description: The ID of the route
+        type: integer
+      method:
+        description: The HTTP method (GET, POST, ...) for the route
+        type: string
+      pattern:
+        description: The path pattern for the route
+        type: string
+      controller:
+        description: The name of the controller associated with the route (when applicable)
+        type: string
+    required:
+      - id
+      - method
+      - pattern
+  PackageDetails:
+    title: Package Details
+    type: object
+    properties:
+      id:
+        description: The ID of the package
+        type: integer
+      vendor:
+        description: The vendor providing the package
+        type: string
+      name:
+        description: The name of the package
+        type: string
+      version:
+        description: The version of the package
+        type: string
+      build:
+        description: The build ID of the package
+        type: string
+      created_at:
+        description: Unix timestamp (in ms) when the package was first seen
+        type: integer
+    required:
+      - id
+      - vendor
+      - name
+      - version
+      - build
+      - created_at
+  AgentDetails:
+    title: agent
+    type: object
+    properties:
+      id:
+        description: The agent ID
+        type: string
+      type:
+        description: The agent type (`JVMagent`, `ruby`, etc)
+        type: string
+      version:
+        description: The version of the agent
+        type: string
+      from:
+        description: The Unix timestamp (in ms) when the agent was first seen
+        type: integer
+      to:
+        description: The Unix timestamp (in ms) when the agent was last seen
+        type: integer
+      last_process_id:
+        description: The most recent process ID associated with the agent
+        type: string
+      active:
+        description: Whether or not the agent is currently active
+        type: boolean
+    required:
+      - id
+      - type
+      - version
+      - from
+      - to
+      - last_process_id
+      - active
+  InlineScriptDetails:
+    title: inline_script
+    example:
+      id: ScriptId
+    type: object
+    properties:
+      id:
+        description: ''
+        type: string
+    required:
+      - id
+  NewApp:
+    title: New application
+    type: object
+    properties:
+      app_id:
+        description: The ID of the newly created Application
+        type: string
+    required:
+      - app_id
+  AppList:
+    title: App list
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      apps:
+        description: A list of apps
+        type: array
+        items:
+          $ref: '#/definitions/AppDetails'
+    required:
+      - total
+      - apps
+  AgentList:
+    title: Apps Agents response
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      agents:
+        description: A list of agents
+        type: array
+        items:
+          $ref: '#/definitions/AgentDetails'
+    required:
+      - total
+      - agents
+  RouteList:
+    title: Apps Routes response
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      routes:
+        description: A list of routes
+        type: array
+        items:
+          $ref: '#/definitions/RouteDetails'
+    required:
+      - total
+      - routes
+  InlineScriptList:
+    title: Apps Inline Scripts response
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      inline_scripts:
+        description: A list of inline scripts
+        type: array
+        items:
+          $ref: '#/definitions/InlineScriptDetails'
+    required:
+      - total
+      - inline_scripts
+  PackageList:
+    title: Package list
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      packages:
+        description: A list of packages
+        type: array
+        items:
+          $ref: '#/definitions/PackageDetails'
+    required:
+      - total
+      - packages
+  EventList:
+    title: Event list
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      events:
+        description: A list of events
+        type: array
+        items:
+          type: object
+    required:
+      - total
+      - events
+  ConfigList:
+    title: Config list
+    type: object
+    properties:
+      total:
+        description: The number of items returned
+        type: integer
+      configs:
+        description: A list of configs
+        type: array
+        items:
+          type: object
+    required:
+      - total
+      - configs
