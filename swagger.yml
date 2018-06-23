@@ -492,7 +492,7 @@ paths:
           description: The app ID
       responses:
         200:
-          description: Details for the given inline script, including approved: whether the script is marked as intended;  template: the script text with literals replaced by ?; created_at: when the script was added to the tCell database; last_reported_at: when the jsagent last reported this script.
+          description: "Details for the given inline script, including approved: whether the script is marked as intended;  template: the script text with literals replaced by ?; created_at: when the script was added to the tCell database; last_reported_at: when the jsagent last reported this script."
           schema:
             $ref: '#/definitions/InlineScriptDetails'
           examples:
